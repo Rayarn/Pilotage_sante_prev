@@ -1,0 +1,47 @@
+resources:
+  jobs:
+    arrete_annuel:
+      name: "[pilotage_sp] Arrete annuel sante-prevoyance"
+      description: >
+        Chaine complete d'un arrete : disponibilite, ingestion, qualite, silver, triangles, provisions sante et
+        prevoyance, agregation, controles et livraison. Chaque etape est rejouable (ecriture par partition d'exercice).
+      max_concurrent_runs: 1
+      # Calcul serverless par defaut (pandas, numpy et openpyxl sont fournis par le runtime).
+      # Pour un cluster de job, ajouter job_clusters et job_cluster_key sur chaque tache (DBR 15.4 LTS ou plus).
+      parameters:
+        - name: exercice
+          default: "2025"
+        - name: catalog
+          default: ${var.catalog}
+      email_notifications:
+        on_failure: [ "${var.notification}" ]
+      tasks:
+        - task_key: t00_initialisation
+          notebook_task: { notebook_path: ../notebooks/00_initialisation.py }
+        - task_key: t01_controle_disponibilite
+          depends_on: [ { task_key: t00_initialisation } ]
+          notebook_task: { notebook_path: ../notebooks/01_controle_disponibilite.py }
+        - task_key: t02_ingestion_bronze
+          depends_on: [ { task_key: t01_controle_disponibilite } ]
+          notebook_task: { notebook_path: ../notebooks/02_ingestion_bronze.py }
+        - task_key: t03_qualite_donnees
+          depends_on: [ { task_key: t02_ingestion_bronze } ]
+          notebook_task: { notebook_path: ../notebooks/03_qualite_donnees.py }
+        - task_key: t04_preparation_silver
+          depends_on: [ { task_key: t03_qualite_donnees } ]
+          notebook_task: { notebook_path: ../notebooks/04_preparation_silver.py }
+        - task_key: t05_triangles
+          depends_on: [ { task_key: t04_preparation_silver } ]
+          notebook_task: { notebook_path: ../notebooks/05_triangles.py }
+        - task_key: t06_provisions_sante
+          depends_on: [ { task_key: t05_triangles } ]
+          notebook_task: { notebook_path: ../notebooks/06_provisions_sante.py }
+        - task_key: t07_provisions_prevoyance
+          depends_on: [ { task_key: t05_triangles } ]
+          notebook_task: { notebook_path: ../notebooks/07_provisions_prevoyance.py }
+        - task_key: t08_agregation_kpi
+          depends_on: [ { task_key: t06_provisions_sante }, { task_key: t07_provisions_prevoyance } ]
+          notebook_task: { notebook_path: ../notebooks/08_agregation_kpi.py }
+        - task_key: t09_controles_livraison
+          depends_on: [ { task_key: t08_agregation_kpi } ]
+          notebook_task: { notebook_path: ../notebooks/09_controles_livraison.py }

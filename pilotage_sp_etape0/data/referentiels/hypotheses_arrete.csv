@@ -1,0 +1,7 @@
+exercice;date_arrete;version_note_technique;taux_technique;bareme_retraite;nb_mois_bf;nb_mois_sp_apriori;profondeur_facteurs_mois;sp_apriori_sante_ind;sp_apriori_sante_col;taux_pfgs_sante;taux_pfgs_prevoyance;coef_surmortalite_pmgd;nb_annees_cout_moyen_ibnr;commentaire
+2020;2020-12-31;NT-2020.1;0.0000;LOI_2010;3;0;24;0.78;0.86;0.050;0.030;3.0;3;Arrete de reprise (bilan d'ouverture) recalcule sur la plateforme a partir de l'historique.
+2021;2021-12-31;NT-2021.1;0.0000;LOI_2010;3;0;24;0.80;0.86;0.050;0.030;3.0;3;Premier arrete de production sur la plateforme. TME moyen 24 mois negatif : taux nul (reglement ANC 2020-11).
+2022;2022-12-31;NT-2022.1;0.0050;LOI_2010;3;0;24;0.81;0.87;0.050;0.030;3.0;3;Remontee des taux : taux technique porte a 0,50 %.
+2023;2023-12-31;NT-2023.1;0.0125;REFORME_2023;6;3;24;0.82;0.88;0.050;0.030;3.0;3;Reforme des retraites de 2023. Bascule du systeme de gestion sante : S/P a priori sur les 3 derniers mois de soins, Bornhuetter-Ferguson sur les 3 precedents.
+2024;2024-12-31;NT-2024.1;0.0150;REFORME_2023;3;0;24;0.82;0.88;0.050;0.030;3.0;3;Retour a 3 mois de Bornhuetter-Ferguson apres rattrapage des stocks.
+2025;2025-12-31;NT-2025.1;0.0175;LFSS_2026;3;0;24;0.80;0.91;0.050;0.030;3.0;3;Suspension de la reforme des retraites (LFSS 2026). Entree d'un grand compte en sante et prevoyance collectives.

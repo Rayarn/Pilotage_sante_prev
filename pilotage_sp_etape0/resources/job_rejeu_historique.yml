@@ -1,0 +1,20 @@
+resources:
+  jobs:
+    rejeu_historique:
+      name: "[pilotage_sp] Rejeu historique 2020-2025"
+      description: >
+        Reconstitue les arretes dans l'ordre chronologique (le pont N-1 vers N lit l'arrete N-1 en gold) :
+        reprise 2020 puis 2021 a 2025. Iterations sequentielles (concurrency 1).
+      max_concurrent_runs: 1
+      tasks:
+        - task_key: boucle_exercices
+          for_each_task:
+            inputs: "[2020, 2021, 2022, 2023, 2024, 2025]"
+            concurrency: 1
+            task:
+              task_key: arrete_exercice
+              run_job_task:
+                job_id: ${resources.jobs.arrete_annuel.id}
+                job_parameters:
+                  exercice: "{{input}}"
+                  catalog: ${var.catalog}

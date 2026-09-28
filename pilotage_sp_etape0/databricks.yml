@@ -1,0 +1,30 @@
+# Databricks Asset Bundle : deploiement du pilotage sante-prevoyance (etape 0)
+# databricks bundle validate -t dev && databricks bundle deploy -t dev
+# databricks bundle run arrete_annuel -t dev --params exercice=2025
+bundle:
+  name: pilotage_sp
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Catalogue Unity Catalog cible
+    default: sp_pilotage_dev
+  notification:
+    description: Adresse de notification des echecs
+    default: actuariat@exemple.fr
+
+targets:
+  dev:
+    mode: development
+    default: true
+    variables:
+      catalog: sp_pilotage_dev
+  prod:
+    mode: production
+    variables:
+      catalog: sp_pilotage
+    permissions:
+      - group_name: actuariat_inventaire
+        level: CAN_MANAGE_RUN

@@ -1,0 +1,283 @@
+% Note technique du provisionnement sante-prevoyance (compilation : xelatex note_technique.tex, deux passes)
+\documentclass[11pt,a4paper]{article}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setmainlanguage{french}
+\setmainfont{IBM Plex Sans}[Scale=0.95]
+\newfontfamily\titres{Spectral}
+\usepackage{amsmath,amssymb}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{booktabs,tabularx,longtable,array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\definecolor{violet}{HTML}{3B2A55}
+\definecolor{prune}{HTML}{6E5A8C}
+\definecolor{gris}{HTML}{6E7783}
+\titleformat{\section}{\titres\Large\color{violet}}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\titres\large\color{violet}}{\thesubsection}{0.8em}{}
+\titleformat{\subsubsection}{\normalfont\itshape\color{prune}}{\thesubsubsection}{0.6em}{}
+\setlist{itemsep=2pt,topsep=4pt}
+\setlength{\parskip}{5pt}\setlength{\parindent}{0pt}\setlength{\emergencystretch}{3em}\usepackage{microtype}
+\pagestyle{fancy}\fancyhf{}\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[L]{\color{gris}\footnotesize Mutuelle Orsane (données fictives) · Note technique NT-2025.1}
+\fancyfoot[R]{\color{gris}\footnotesize \thepage}
+\input{exemples.tex}
+\newcommand{\eur}{\,€}
+
+\begin{document}
+
+\begin{titlepage}
+\vspace*{3cm}
+{\color{prune}\small DALVERNE · ACTUARIAT}\par\vspace{0.6cm}
+{\titres\Huge\color{violet} Note technique\par}\vspace{0.3cm}
+{\titres\Large Provisionnement santé et prévoyance\par}\vspace{0.3cm}
+{\large Pilotage automatisé du passif, étape 0\par}
+\vspace{1.5cm}
+\begin{tabular}{@{}ll}
+Entité & Mutuelle Orsane (portefeuille et données entièrement fictifs)\\
+Version & NT-2025.1 (arrêté au 31 décembre 2025)\\
+Historique & NT-2020.1 à NT-2025.1, une version par arrêté\\
+Code & paquet \texttt{pilotage\_sp} 1.0.0\\
+Statut & document de référence, à relire à chaque arrêté\\
+\end{tabular}
+\vfill
+{\small\color{gris} Tous les chiffres de ce document sont produits par le moteur de production (script \texttt{docs/note\_technique/exemples.py}) : un changement de méthode sans mise à jour de la note est détectable par simple régénération.}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Objet, périmètre et principes}
+
+Cette note décrit, pour chaque provision calculée par la chaîne, la formule appliquée, les hypothèses retenues, leur justification et un exemple chiffré issu du moteur. Elle sert de référence à l'actuaire qui valide l'arrêté, au réviseur indépendant et à l'équipe qui maintient le code.
+
+Périmètre :
+\begin{itemize}
+\item frais de santé individuels et collectifs : provision pour sinistres à payer (PSAP) et provision pour frais de gestion (PFGS) ;
+\item prévoyance individuelle (travailleurs non salariés) et collective : incapacité temporaire de travail, invalidité, décès ;
+\item hors périmètre : provision pour primes non acquises (contrats en année civile, nulle au 31 décembre), provision pour risques croissants (garantie décès individuelle annuelle), rentes éducation et de conjoint, revalorisation des prestations, réassurance.
+\end{itemize}
+
+Principes de conception :
+\begin{enumerate}
+\item Calcul déterministe et rejouable : mêmes données et même version d'hypothèses donnent les mêmes provisions, au centime. Chaque étape écrit une partition d'exercice ; un rejeu remplace la partition.
+\item Hypothèses versionnées hors du code : la table \texttt{ref.hypotheses\_arrete} porte une ligne par arrêté ; toute modification passe par une nouvelle version de la note.
+\item Séparation stricte entre calcul et intelligence artificielle : l'assistance lit les tables gold pour analyser et rédiger, elle ne produit jamais un chiffre de provision.
+\item Double calcul systématique : chaque arrêté est calculé avec les hypothèses N et N-1, ce qui isole l'effet des hypothèses de l'aléa de liquidation.
+\end{enumerate}
+
+\section{Données et qualité}
+
+\subsection{Extractions}
+La gestion livre sept fichiers par exercice et un fichier témoin (nombre de lignes, somme de contrôle, empreinte sha256). L'arrêté 2020 est une reprise : ses flux couvrent 2019 et 2020 en santé, 2010 à 2020 pour les paiements de prévoyance.
+
+\begin{center}\small
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+Fichier & Contenu \\
+\midrule
+REF\_CONTRATS & contrats en vigueur, garanties collectives (franchise, taux d'indemnité, rente, capitaux)\\
+REF\_ASSURES & affiliations actives sur N-1 et N, garanties individuelles\\
+FLX\_COTISATIONS & quittances de l'exercice (mensuelles en collectif, trimestrielles en prévoyance individuelle)\\
+FLX\_PRESTATIONS\_SANTE & lignes de prestations payées dans l'exercice\\
+SNP\_SINISTRES\_PREVOYANCE & photographie au 31/12 de tous les dossiers déclarés, statut connu à l'arrêté\\
+FLX\_PRESTATIONS\_PREVOYANCE & paiements de l'exercice (indemnités, arrérages, capitaux)\\
+CPT\_BALANCE & balance comptable : cotisations acquises et prestations payées\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Contrôles}
+Trois niveaux de contrôle s'enchaînent.
+\begin{enumerate}
+\item Disponibilité (notebook 01) : présence, structure, nombre de lignes, somme de contrôle et empreinte contre le témoin. Tout écart est bloquant.
+\item Qualité (notebook 03) : 22 règles déclaratives (unicité, complétude, validité, cohérence, intégrité, exhaustivité) avec un seuil de tolérance et une action (rejet, quarantaine, correction, signalement). Une règle bloquante hors seuil arrête la chaîne ; une règle majeure hors seuil impose une validation au journal d'arrêté.
+\item Réconciliation (notebook 04) : flux nettoyés contre balance comptable par branche, segment et garantie, tolérance de 0,10\,\%, bloquante. Les paiements des dossiers en quarantaine restent dans les flux : ce sont des décaissements réels, seul le calcul des provisions les exclut.
+\end{enumerate}
+
+\section{Hypothèses}
+
+\subsection{Taux d'actualisation}
+L'article A331-22 du Code des assurances plafonne le taux d'actualisation des provisions d'incapacité et d'invalidité à 75\,\% du taux moyen des emprunts d'État (TME) des 24 derniers mois, dans la limite de 4,5\,\%. Lorsque cette moyenne est négative, le taux retenu est inférieur ou égal à zéro (règlement ANC 2020-11). Le plafond n'est jamais saisi : la chaîne le recalcule à partir de la série mensuelle officielle (table \texttt{ref.tme\_mensuel}) et bloque l'arrêté si le taux retenu le dépasse.
+
+\begin{center}\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Arrêté & TME moyen 24 mois & Plafond (75\,\%) & Taux retenu\\
+\midrule
+\tabTaux
+\bottomrule
+\end{tabular}
+\end{center}
+Le taux retenu suit une grille de 0,25 point et reste nettement sous le plafond (marge de 0,16 à 0,78 point selon les années) : le passage d'un palier à l'autre est une décision de gouvernance documentée, pas un automatisme.
+
+\subsection{Âge de fin de service des prestations}
+Les indemnités journalières et les rentes d'invalidité cessent à l'âge légal de départ en retraite. Trois barèmes sont codés ; chaque arrêté retient celui en vigueur à sa date.
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+Naissance & Loi 2010 & Réforme 2023 & LFSS 2026\\
+\midrule
+\tabRetraite
+\bottomrule
+\end{tabular}
+\end{center}
+Barèmes retenus : loi 2010 pour 2020 à 2022, réforme 2023 pour 2023 et 2024, suspension par la LFSS 2026 pour 2025.
+
+\subsection{Autres hypothèses}
+\begin{itemize}
+\item Lois de maintien en incapacité, de passage en invalidité et de maintien en invalidité : tables BCAC (réglementaires), interpolation linéaire mensuelle de la loi d'invalidité annuelle.
+\item Mortalité pour le maintien de la garantie décès : TH et TF 00-02, coefficient de surmortalité de 3 appliqué aux personnes en arrêt ou en invalidité.
+\item Santé : facteurs estimés sur les 24 derniers mois calendaires ; Bornhuetter-Ferguson sur les 3 derniers mois de soins ; S/P a priori sur les 3 derniers mois en 2023 seulement (bascule du système de gestion).
+\item Chargements de gestion : 5\,\% de la PSAP santé, 3\,\% des provisions de prévoyance.
+\end{itemize}
+
+\section{Frais de santé}
+
+\subsection{Triangle et Chain Ladder}
+Soit $C_{i,j}$ le cumul des remboursements du mois de soins $i$ payés jusqu'au mois de développement $j$ (de 0 à 23 ; au-delà, la santé est liquidée). Le facteur de développement est estimé par la moyenne pondérée par les volumes, restreinte aux cellules dont la date calendaire tombe dans les $P = 24$ derniers mois :
+\[
+\hat f_j = \frac{\sum_{i \in \mathcal{I}_j} C_{i,j+1}}{\sum_{i \in \mathcal{I}_j} C_{i,j}}, \qquad
+\mathcal{I}_j = \{ i : i + j + 1 \in [A - P + 1,\ A] \},
+\]
+où $A$ est le mois d'arrêté. La restriction calendaire rend les facteurs sensibles aux changements récents de cadence (dématérialisation, retards de gestion) sans oublier la structure longue. La charge ultime et la PSAP valent
+\[
+\hat C_{i,\infty} = C_{i,a_i} \prod_{j \ge a_i} \hat f_j, \qquad R_i = \hat C_{i,\infty} - C_{i,a_i},
+\]
+avec $a_i$ l'ancienneté du mois de soins $i$ à l'arrêté.
+
+Exemple (triangle réduit à trois mois de soins et trois développements) : avec $C = \begin{pmatrix}600&900&1000\\660&990&\cdot\\720&\cdot&\cdot\end{pmatrix}$, on obtient $\hat f_0 = \cljF$, $\hat f_1 = \cljG$, des ultimes de \cljUa{} et \cljUb{} pour les deux mois ouverts et une PSAP de \cljR.
+
+\subsection{Mois récents : Bornhuetter-Ferguson et S/P a priori}
+Pour les mois de soins les plus récents, le cumul payé est trop faible pour être extrapolé sans bruit. La méthode de Bornhuetter-Ferguson combine le payé et une charge a priori :
+\[
+\hat C^{BF}_{i,\infty} = C_{i,a_i} + \left(1 - \frac{1}{F_{a_i}}\right) \cdot \mathrm{SP}_0 \cdot P_i, \qquad F_{a} = \prod_{j \ge a} \hat f_j,
+\]
+où $P_i$ est la cotisation acquise du mois $i$ et $\mathrm{SP}_0$ le S/P a priori du segment. Exemple : pour le dernier mois du triangle ci-dessus, $F_0 = \bfFc$ ; avec $P = 1\,200$ et $\mathrm{SP}_0 = 85\,\%$, la PSAP vaut \bfR{} et l'ultime \bfU.
+
+Lorsque la cadence de paiement est elle-même altérée (bascule du système de gestion fin 2023), la méthode de Bornhuetter-Ferguson hérite du biais : elle suppose une cadence normale. L'hypothèse \texttt{nb\_mois\_sp\_apriori} impose alors l'ultime $\max(\mathrm{SP}_0 \cdot P_i,\ C_{i,a_i})$ sur les derniers mois. C'est un jugement d'expert, tracé dans la table d'hypothèses et rétro-testé à l'arrêté suivant.
+
+\subsection{Incertitude : modèle de Mack}
+L'erreur quadratique de prédiction est estimée par la formule de Mack (1993) sur la PSAP Chain Ladder, avec
+$\hat\sigma^2_j = \frac{1}{|\mathcal{I}_j|-1}\sum_{i \in \mathcal{I}_j} C_{i,j}\left(\frac{C_{i,j+1}}{C_{i,j}} - \hat f_j\right)^2$
+et l'extrapolation usuelle pour les derniers développements. Elle n'est pas intégrée à la provision (meilleure estimation), mais restituée comme indicateur de pilotage.
+
+\subsection{Résultats et rétro-test}
+Au 31 décembre 2025, la PSAP santé vaut \santePsapCol\eur{} en collectif et \santePsapInd\eur{} en individuel. Le tableau compare, pour chaque arrêté, la PSAP estimée à la PSAP réellement observée ensuite dans le portefeuille simulé (en milliers d'euros) :
+
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+& \multicolumn{3}{c}{Collectif} & \multicolumn{3}{c}{Individuel}\\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Arrêté & Estimée & Réelle & Écart & Estimée & Réelle & Écart\\
+\midrule
+\tabBacktest
+\bottomrule
+\end{tabular}
+\end{center}
+Lecture : en régime normal, l'écart reste de quelques points. Le sous-provisionnement de 2023 en collectif (bascule du système de gestion) est réduit mais non annulé par le S/P a priori ; il se retrouve en mali de liquidation en 2024. En individuel, le S/P a priori de 80\,\% est prudent face à un S/P observé proche de 76\,\% : la surestimation des derniers mois est assumée et documentée.
+
+\section{Prévoyance}
+
+\subsection{Notations}
+Pour un arrêt de travail survenu à l'âge $x$ (âge entier à la survenance) : $L_x(k)$ nombre de personnes maintenues en incapacité à l'ancienneté $k$ mois (table BCAC, $k = 0, \dots, 35$, $L_x(36) = 0$) ; $N_x(k)$ nombre de passages en invalidité au cours du mois $k$ ; $\ell_y(m)$ nombre de personnes maintenues en invalidité $m$ mois après une entrée à l'âge $y$ (interpolation mensuelle de la table annuelle). $v = 1/(1+i)$ avec $i$ le taux d'actualisation. $s$ désigne l'ancienneté en mois entiers à l'arrêté et $r$ le nombre de mois restant jusqu'à l'âge de fin de service du barème.
+
+\subsection{Incapacité en cours}
+La provision mathématique d'incapacité, premier mois certain :
+\[
+\mathrm{PM}^{inc} = \mathrm{IJ}_m \sum_{k=0}^{K} \frac{L_x(s+k)}{L_x(s)}\, v^{k/12}, \qquad K = \min(35 - s,\ r - 1), \qquad \mathrm{IJ}_m = \mathrm{IJ}_{jour} \cdot \tfrac{365{,}25}{12}.
+\]
+La provision pour rentes d'invalidité en attente (passage futur d'un arrêt en cours) :
+\[
+\mathrm{PM}^{pas} = R \sum_{k=0}^{K} \frac{N_x(s+k)}{L_x(s)}\, v^{(k+1)/12}\ \ddot a^{inv}_{y_k}(r - k - 1),
+\qquad \ddot a^{inv}_{y}(n) = \frac{1}{12}\sum_{m=0}^{n-1} \frac{\ell_y(m)}{\ell_y(0)}\, v^{m/12},
+\]
+avec $y_k$ l'âge atteint au passage et $R$ la rente d'invalidité garantie (catégorie 2 retenue par défaut).
+
+Exemple (arrêt collectif survenu le 10 juillet 2025, assuré né le 1\textsuperscript{er} mars 1980, indemnité de 60\eur{} par jour, rente garantie de 15\,000\eur, capital décès de 90\,000\eur, taux de 1,75\,\%, barème LFSS 2026) : ancienneté $s = \exIncS$ mois, $L_{45}(\exIncS) = \exIncL$, $r = \exIncR$ mois. Le moteur donne $\mathrm{PM}^{inc} = \exIncPm$\eur, $\mathrm{PM}^{pas} = \exIncPas$\eur{} et une provision de maintien de la garantie décès de \exIncGd\eur. La provision de passage dépasse la provision d'incapacité : un arrêt de cinq mois à 45 ans a une probabilité non négligeable de basculer en invalidité, pour une rente servie près de vingt ans.
+
+\subsection{Invalidité en cours}
+\[
+\mathrm{PM}^{inv} = \frac{R}{12} \sum_{m=0}^{r-1} \frac{\ell_y(t+m)}{\ell_y(t)}\, v^{m/12},
+\]
+avec $t$ l'ancienneté en invalidité. Exemple : invalide entrée le 5 novembre 2022, née le 20 septembre 1972, rente annuelle de 14\,400\eur{} : $t = \exInvT$ mois, $r = \exInvR$ mois, $\mathrm{PM}^{inv} = \exInvPm$\eur.
+
+Sensibilités du même dossier :
+\begin{itemize}
+\item barème loi 2010 (fin à 62 ans) : \exInvPmLOIA\eur, soit la mesure de l'effet réforme sur un dossier ;
+\item taux de 0\,\% : \exInvPmTauxZero\eur ; taux de 3,5\,\% : \exInvPmTauxHaut\eur.
+\end{itemize}
+
+\subsection{Maintien de la garantie décès}
+Les assurés en arrêt ou en invalidité restent couverts en décès sans cotiser. La provision vaut, pour un capital $C$,
+\[
+\mathrm{PMGD} = C \sum_{m} p_m\, q_m\, v^{(m+1)/12}, \qquad q_m = 1 - \left(1 - \min(1,\ 3\, q_{x+m/12})\right)^{1/12},
+\]
+où $p_m$ est la probabilité de maintien (loi d'incapacité, puis loi d'invalidité pour la part qui passera en invalidité) et $q$ la mortalité TH ou TF 00-02 selon le sexe. Dans l'exemple d'invalide ci-dessus, $\mathrm{PMGD} = \exInvGd$\eur{} pour un capital de 80\,000\eur.
+
+\subsection{Autres provisions de dossiers connus}
+\begin{itemize}
+\item Prestations échues non réglées : pour les dossiers en cours ou clos depuis moins de 12 mois, montant dû (indemnité ou arrérage journalier multiplié par les jours écoulés depuis le début d'indemnisation) diminué des règlements. Elle capte les rattrapages versés à la déclaration tardive et la dernière échéance d'un dossier clos.
+\item Capitaux décès connus : capital diminué des règlements, pour les décès déclarés non encore réglés.
+\end{itemize}
+
+\subsection{Sinistres survenus non déclarés (IBNR)}
+Pour l'incapacité et le décès, un triangle de nombres (année de survenance, délai de déclaration en années) est développé par Chain Ladder pondéré sur dix années de survenance. Le nombre d'IBNR est multiplié par un coût moyen calculé sur les trois dernières années de survenance complètes :
+\begin{itemize}
+\item incapacité : payé, provisions d'incapacité et prestations échues des dossiers de ces années ; la part du coût qui se réalise en invalidité (rentes en attente, invalidités rattachées) est isolée et restituée en IBNR invalidité, pour que la liquidation se lise garantie par garantie ;
+\item décès : capital moyen des décès de ces années.
+\end{itemize}
+Au 31 décembre 2025, l'IBNR de l'incapacité collective vaut \ibnrIncCol\eur{} pour la survenance 2025, auxquels s'ajoutent \ibnrInvCol\eur{} au titre de l'invalidité future de ces arrêts. L'essentiel correspond aux arrêts du dernier trimestre encore en franchise de 90 jours à l'arrêté.
+
+\subsection{Frais de gestion}
+PFGS de 3\,\% des provisions de prévoyance, par garantie et année de survenance.
+
+\section{Agrégation, pont et liquidation}
+
+Les provisions sont consolidées dans une table longue (branche, segment, garantie, type, année de survenance d'origine, jeu d'hypothèses). Le pont, hors frais de gestion, décompose la variation :
+\[
+\underbrace{P^{N-1}_{N-1}}_{\text{ouverture}} - \underbrace{E_N}_{\text{règlements}} - \underbrace{B_N}_{\text{liquidation}} + \underbrace{S_N}_{\text{nouvelle survenance}} + \underbrace{H_N}_{\text{hypothèses}} = \underbrace{P^{N}_{N}}_{\text{clôture}},
+\]
+avec $E_N$ les paiements de N sur survenances antérieures, $B_N = P^{N-1}_{N-1} - E_N - P^{N-1}_{N}(\le N-1)$ (positif : boni), $S_N = P^{N-1}_{N}(N)$ et $H_N = P^{N}_{N} - P^{N-1}_{N}$. L'exposant désigne le jeu d'hypothèses, l'indice le stock de données. L'année de survenance d'un dossier d'invalidité ou de décès rattaché est celle de l'arrêt d'origine. Un jeu intermédiaire (hypothèses N-1 avec le seul taux N) sépare l'effet taux de l'effet barème.
+
+Pont 2025 (milliers d'euros ; liquidation positive = boni) :
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Ligne & Ouverture & Règlements & Liquidation & Nouvelle & Hypothèses & Clôture\\
+\midrule
+\tabPont
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Contrôles de livraison}
+Le notebook 09 vérifie : égalité entre synthèse et détail ; absence de provision agrégée négative ; bouclage du pont à l'euro près ; conformité du taux au plafond ; réconciliation comptable ; règles qualité majeures à valider ; variation par branche supérieure à 25\,\% (alerte). Les résultats alimentent le journal d'arrêté (statut livré ou livré avec réserves, validation de l'actuaire en attente) et le manifeste d'empreintes des fichiers livrés.
+
+Synthèse au 31 décembre 2025 (milliers d'euros), total de \totalProv\,M€ :
+\begin{center}\small
+\begin{tabular}{@{}llr@{}}
+\toprule
+Branche & Provision & Montant\\
+\midrule
+\tabSynthese
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Limites connues et chantiers}
+\begin{itemize}
+\item Les lois BCAC sont appliquées sans ajustement d'expérience ; les écarts de liquidation de l'incapacité (de $-14$ à $+7\,\%$ selon les années) justifient une étude de lois d'expérience certifiables.
+\item La catégorie d'invalidité future est supposée être la catégorie 2 ; la répartition observée (environ 15\,\% en catégorie 1) rend la provision de passage légèrement prudente.
+\item La provision de maintien de la garantie décès repose sur un coefficient de surmortalité de 3, non calibré sur le portefeuille ; c'est l'hypothèse la plus structurante de la branche décès.
+\item Le coût moyen des IBNR n'est ni revalorisé ni différencié par âge ; l'entrée d'un grand compte modifie la structure et doit être suivie.
+\item Le taux TME est repris d'une publication de place ; en production, la série doit être alimentée directement depuis la Banque de France.
+\item Aucune revalorisation des prestations n'est modélisée ; une clause de revalorisation contractuelle imposerait une provision complémentaire.
+\end{itemize}
+
+\end{document}

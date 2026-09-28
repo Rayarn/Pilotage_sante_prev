@@ -1,0 +1,305 @@
+{
+ "exercice": 2023,
+ "entite": "Mutuelle Orsane",
+ "date_arrete": "31 décembre 2023",
+ "version": "NT-2023.1",
+ "titre_cle": "Les provisions atteignent 58,6 M€, en hausse de 15,5 % sur un an.",
+ "sous_titre_cle": "La réforme des retraites et la bascule du système santé ajoutent 7,5 M€ hors effet taux : c'est l'essentiel de la hausse.",
+ "faits": [
+  [
+   "Bascule du système santé",
+   "Paiements retardés en fin d'année et décomptes réémis en double sous de nouveaux identifiants."
+  ],
+  [
+   "Réforme des retraites",
+   "Le recul de l'âge légal allonge la durée de service des rentes d'invalidité."
+  ],
+  [
+   "Taux à 1,25 %",
+   "Hausse du taux d'actualisation ; baisse du remboursement obligatoire dentaire au 1er octobre."
+  ]
+ ],
+ "recommandations": [
+  [
+   "Sécuriser la bascule",
+   "Exiger de la gestion un état du stock de décomptes en attente à chaque clôture mensuelle."
+  ],
+  [
+   "Tracer le jugement",
+   "Le recours au S/P a priori est un jugement d'expert : le documenter et le rétro-tester en 2024."
+  ],
+  [
+   "Mesurer la réforme",
+   "L'effet retraite sur l'invalidité est durable : l'intégrer au tarif prévoyance 2024."
+  ]
+ ],
+ "chiffres": [
+  {
+   "valeur": "58,6 M€",
+   "libelle": "Provisions techniques totales, PFGS incluses"
+  },
+  {
+   "valeur": "+15,5 %",
+   "libelle": "Variation par rapport au 31 décembre 2022"
+  },
+  {
+   "valeur": "81 %",
+   "libelle": "S/P comptable santé (charge / cotisations acquises)"
+  },
+  {
+   "valeur": "124 %",
+   "libelle": "S/P comptable prévoyance, effet des hypothèses inclus"
+  }
+ ],
+ "repartition": {
+  "labels": [
+   "Prévoyance",
+   "Santé"
+  ],
+  "valeurs": [
+   57.1,
+   1.53
+  ],
+  "centre": "97 %",
+  "types": [
+   {
+    "type": "PM invalidité",
+    "montant": "30,0 M€"
+   },
+   {
+    "type": "Rentes en attente",
+    "montant": "11,3 M€"
+   },
+   {
+    "type": "Maintien garantie décès",
+    "montant": "5,8 M€"
+   },
+   {
+    "type": "PM incapacité",
+    "montant": "3,5 M€"
+   }
+  ],
+  "sante": "1,5 M€"
+ },
+ "pont": [
+  {
+   "libelle": "Provisions 2022",
+   "valeur": 49.279,
+   "nature": "total"
+  },
+  {
+   "libelle": "Règlements",
+   "valeur": -10.493,
+   "nature": "delta"
+  },
+  {
+   "libelle": "Liquidation",
+   "valeur": 1.755,
+   "nature": "delta"
+  },
+  {
+   "libelle": "Nouvelle survenance",
+   "valeur": 11.176,
+   "nature": "delta"
+  },
+  {
+   "libelle": "Hypothèses",
+   "valeur": 5.177,
+   "nature": "delta"
+  },
+  {
+   "libelle": "Provisions 2023",
+   "valeur": 56.894,
+   "nature": "total"
+  }
+ ],
+ "pont_commentaire": [
+  "Règlements de l'exercice sur sinistres antérieurs : 10,5 M€",
+  "Écart de liquidation : 1,8 M€ de mali, soit -3,6 % de l'ouverture",
+  "Effet des hypothèses : 5,2 M€ (taux -2,3 M€, barème et autres 7,5 M€)"
+ ],
+ "sante": {
+  "annees": [
+   "2019",
+   "2020",
+   "2021",
+   "2022",
+   "2023"
+  ],
+  "sp_ind": [
+   0.688,
+   0.588,
+   0.79,
+   0.764,
+   0.758
+  ],
+  "sp_col": [
+   0.758,
+   0.684,
+   0.855,
+   0.847,
+   0.83
+  ],
+  "cartes": [
+   {
+    "titre": "PSAP santé",
+    "valeur": "1,46 M€",
+    "texte": "19,2 % des prestations payées dans l'année ; PFGS de 5 % en sus."
+   },
+   {
+    "titre": "Incertitude",
+    "valeur": "11 %",
+    "texte": "Coefficient de variation de Mack sur la PSAP Chain Ladder, segments additionnés."
+   },
+   {
+    "titre": "Liquidation N-1",
+    "valeur": "-3,7 %",
+    "texte": "COL -3,3 % ; IND -4,2 % (positif = boni)."
+   }
+  ],
+  "methodes": [
+   "Chain Ladder pondéré sur 24 mois calendaires pour les mois de soins anciens",
+   "Bornhuetter-Ferguson sur 3 mois de soins précédant les derniers",
+   "S/P a priori sur les 3 derniers mois de soins (jugement d'expert)"
+  ]
+ },
+ "prevoyance": {
+  "annees": [
+   "2020",
+   "2021",
+   "2022",
+   "2023"
+  ],
+  "series": [
+   {
+    "nom": "Invalidité",
+    "valeurs": [
+     33.73,
+     36.71,
+     39.06,
+     44.6
+    ]
+   },
+   {
+    "nom": "Incapacité",
+    "valeurs": [
+     4.6,
+     4.46,
+     4.9,
+     5.3
+    ]
+   },
+   {
+    "nom": "Décès",
+    "valeurs": [
+     5.22,
+     6.14,
+     5.89,
+     7.2
+    ]
+   }
+  ],
+  "total": "57,1 M€",
+  "effet_taux": "-2,3 M€",
+  "effet_autres": "7,5 M€",
+  "encours": {
+   "DECES": 3,
+   "INCAPACITE": 265,
+   "INVALIDITE": 276
+  },
+  "ibnr": {
+   "Décès": "0,79 M€",
+   "Incapacité": "1,37 M€",
+   "Invalidité": "1,81 M€"
+  },
+  "declares_annees": [
+   "2020",
+   "2021",
+   "2022",
+   "2023"
+  ],
+  "declares": [
+   497,
+   525,
+   501,
+   558
+  ],
+  "liquidation": [
+   {
+    "garantie": "Décès",
+    "taux": "-23,3 %"
+   },
+   {
+    "garantie": "Incapacité",
+    "taux": "-13,7 %"
+   },
+   {
+    "garantie": "Invalidité",
+    "taux": "+0,7 %"
+   }
+  ]
+ },
+ "qualite": {
+  "nb_regles": 22,
+  "nb_conformes": 14,
+  "nb_toleres": 7,
+  "nb_hors_seuil": 1,
+  "hors_seuil": [
+   {
+    "id": "S02",
+    "libelle": "Doublons fonctionnels (décomptes réémis)",
+    "severite": "Majeur",
+    "nb": 393,
+    "action": "Rejet"
+   }
+  ],
+  "reconciliation_max": "0,01 %",
+  "ecart_brut_sante": "0,39 %",
+  "reserves": [
+   "Règles qualité majeures hors seuil : validation de l'actuaire requise",
+   "Variation d'une branche supérieure à 25 %, expliquée par les faits marquants"
+  ]
+ },
+ "hypotheses": [
+  [
+   "Taux d'actualisation",
+   "1,25 %",
+   "0,50 %"
+  ],
+  [
+   "Plafond A331-22 (75 % TME 24 mois)",
+   "1,79 %",
+   "0,66 %"
+  ],
+  [
+   "Barème de retraite",
+   "Réforme 2023",
+   "Loi 2010"
+  ],
+  [
+   "Santé : mois en Bornhuetter-Ferguson",
+   "3",
+   "3"
+  ],
+  [
+   "Santé : mois en S/P a priori",
+   "3",
+   "0"
+  ],
+  [
+   "S/P a priori individuel / collectif",
+   "82 % / 88 %",
+   "81 % / 87 %"
+  ],
+  [
+   "Lois de maintien et de passage",
+   "BCAC",
+   "BCAC"
+  ],
+  [
+   "Chargement de gestion santé / prévoyance",
+   "5 % / 3 %",
+   "5 % / 3 %"
+  ]
+ ]
+}

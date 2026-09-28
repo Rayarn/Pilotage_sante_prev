@@ -1,0 +1,10 @@
+data/raw/
+.spark-warehouse/
+livraison/
+outils/generation_donnees/verite/
+__pycache__/
+.pytest_cache/
+*.aux
+*.log
+*.toc
+*.out

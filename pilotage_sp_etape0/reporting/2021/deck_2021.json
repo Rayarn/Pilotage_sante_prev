@@ -1,0 +1,275 @@
+{
+ "exercice": 2021,
+ "entite": "Mutuelle Orsane",
+ "date_arrete": "31 décembre 2021",
+ "version": "NT-2021.1",
+ "titre_cle": "Les provisions atteignent 48,2 M€, en hausse de 8,6 % sur un an.",
+ "sous_titre_cle": "La reprise de l'historique tient : la liquidation de 2020 se solde par un mali de 2,9 % de l'ouverture.",
+ "faits": [
+  [
+   "Premier arrêté sur la plateforme",
+   "Bilan d'ouverture 2020 recalculé à partir de l'historique, puis arrêté 2021 produit de bout en bout."
+  ],
+  [
+   "Rattrapage des soins",
+   "Retour des soins reportés pendant la crise sanitaire et montée en charge du 100 % Santé en audiologie."
+  ],
+  [
+   "Taux maintenu à 0 %",
+   "La moyenne du TME sur 24 mois est négative : le taux d'actualisation reste nul."
+  ]
+ ],
+ "recommandations": [
+  [
+   "Fiabiliser la reprise",
+   "Faire valider par la direction financière le bilan d'ouverture recalculé et figer la version."
+  ],
+  [
+   "Documenter la chaîne",
+   "Soumettre la note technique NT-2021.1 à la revue indépendante avant la clôture."
+  ],
+  [
+   "Suivre la santé individuelle",
+   "Le boni de liquidation confirme la prudence du S/P a priori, à revoir en 2022."
+  ]
+ ],
+ "chiffres": [
+  {
+   "valeur": "48,2 M€",
+   "libelle": "Provisions techniques totales, PFGS incluses"
+  },
+  {
+   "valeur": "+8,6 %",
+   "libelle": "Variation par rapport au 31 décembre 2020"
+  },
+  {
+   "valeur": "82 %",
+   "libelle": "S/P comptable santé (charge / cotisations acquises)"
+  },
+  {
+   "valeur": "91 %",
+   "libelle": "S/P comptable prévoyance, effet des hypothèses inclus"
+  }
+ ],
+ "repartition": {
+  "labels": [
+   "Prévoyance",
+   "Santé"
+  ],
+  "valeurs": [
+   47.32,
+   0.85
+  ],
+  "centre": "98 %",
+  "types": [
+   {
+    "type": "PM invalidité",
+    "montant": "24,7 M€"
+   },
+   {
+    "type": "Rentes en attente",
+    "montant": "9,3 M€"
+   },
+   {
+    "type": "Maintien garantie décès",
+    "montant": "4,5 M€"
+   },
+   {
+    "type": "PM incapacité",
+    "montant": "2,8 M€"
+   }
+  ],
+  "sante": "0,9 M€"
+ },
+ "pont": [
+  {
+   "libelle": "Provisions 2020",
+   "valeur": 43.027,
+   "nature": "total"
+  },
+  {
+   "libelle": "Règlements",
+   "valeur": -8.176,
+   "nature": "delta"
+  },
+  {
+   "libelle": "Liquidation",
+   "valeur": 1.25,
+   "nature": "delta"
+  },
+  {
+   "libelle": "Nouvelle survenance",
+   "valeur": 10.639,
+   "nature": "delta"
+  },
+  {
+   "libelle": "Hypothèses",
+   "valeur": 0.007,
+   "nature": "delta"
+  },
+  {
+   "libelle": "Provisions 2021",
+   "valeur": 46.748,
+   "nature": "total"
+  }
+ ],
+ "pont_commentaire": [
+  "Règlements de l'exercice sur sinistres antérieurs : 8,2 M€",
+  "Écart de liquidation : 1,3 M€ de mali, soit -2,9 % de l'ouverture",
+  "Effet des hypothèses : 0,0 M€ (taux 0,0 M€, barème et autres 0,0 M€)"
+ ],
+ "sante": {
+  "annees": [
+   "2019",
+   "2020",
+   "2021"
+  ],
+  "sp_ind": [
+   0.688,
+   0.588,
+   0.787
+  ],
+  "sp_col": [
+   0.758,
+   0.684,
+   0.85
+  ],
+  "cartes": [
+   {
+    "titre": "PSAP santé",
+    "valeur": "0,81 M€",
+    "texte": "11,1 % des prestations payées dans l'année ; PFGS de 5 % en sus."
+   },
+   {
+    "titre": "Incertitude",
+    "valeur": "5 %",
+    "texte": "Coefficient de variation de Mack sur la PSAP Chain Ladder, segments additionnés."
+   },
+   {
+    "titre": "Liquidation N-1",
+    "valeur": "+5,5 %",
+    "texte": "COL +1,0 % ; IND +12,3 % (positif = boni)."
+   }
+  ],
+  "methodes": [
+   "Chain Ladder pondéré sur 24 mois calendaires pour les mois de soins anciens",
+   "Bornhuetter-Ferguson sur 3 mois de soins les plus récents"
+  ]
+ },
+ "prevoyance": {
+  "annees": [
+   "2020",
+   "2021"
+  ],
+  "series": [
+   {
+    "nom": "Invalidité",
+    "valeurs": [
+     33.73,
+     36.71
+    ]
+   },
+   {
+    "nom": "Incapacité",
+    "valeurs": [
+     4.6,
+     4.46
+    ]
+   },
+   {
+    "nom": "Décès",
+    "valeurs": [
+     5.22,
+     6.14
+    ]
+   }
+  ],
+  "total": "47,3 M€",
+  "effet_taux": "0,0 M€",
+  "effet_autres": "0,0 M€",
+  "encours": {
+   "DECES": 5,
+   "INCAPACITE": 241,
+   "INVALIDITE": 231
+  },
+  "ibnr": {
+   "Décès": "0,93 M€",
+   "Incapacité": "1,28 M€",
+   "Invalidité": "1,44 M€"
+  },
+  "declares_annees": [
+   "2020",
+   "2021"
+  ],
+  "declares": [
+   497,
+   525
+  ],
+  "liquidation": [
+   {
+    "garantie": "Décès",
+    "taux": "-14,3 %"
+   },
+   {
+    "garantie": "Incapacité",
+    "taux": "+2,3 %"
+   },
+   {
+    "garantie": "Invalidité",
+    "taux": "-2,0 %"
+   }
+  ]
+ },
+ "qualite": {
+  "nb_regles": 22,
+  "nb_conformes": 15,
+  "nb_toleres": 7,
+  "nb_hors_seuil": 0,
+  "hors_seuil": [],
+  "reconciliation_max": "0,01 %",
+  "ecart_brut_sante": "0,03 %",
+  "reserves": []
+ },
+ "hypotheses": [
+  [
+   "Taux d'actualisation",
+   "0,00 %",
+   "0,00 %"
+  ],
+  [
+   "Plafond A331-22 (75 % TME 24 mois)",
+   "-0,03 %",
+   "0,02 %"
+  ],
+  [
+   "Barème de retraite",
+   "Loi 2010",
+   "Loi 2010"
+  ],
+  [
+   "Santé : mois en Bornhuetter-Ferguson",
+   "3",
+   "3"
+  ],
+  [
+   "Santé : mois en S/P a priori",
+   "0",
+   "0"
+  ],
+  [
+   "S/P a priori individuel / collectif",
+   "80 % / 86 %",
+   "78 % / 86 %"
+  ],
+  [
+   "Lois de maintien et de passage",
+   "BCAC",
+   "BCAC"
+  ],
+  [
+   "Chargement de gestion santé / prévoyance",
+   "5 % / 3 %",
+   "5 % / 3 %"
+  ]
+ ]
+}
